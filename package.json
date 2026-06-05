@@ -1,0 +1,14 @@
+{
+  "name": "wolume",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "node scripts/run-cycle.js",
+    "create-storage-state": "node scripts/create-storage-state.js"
+  },
+  "dependencies": {
+    "node-html-parser": "^7.0.1",
+    "playwright": "1.60.0"
+  }
+}

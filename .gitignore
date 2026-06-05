@@ -1,0 +1,17 @@
+node_modules/
+npm-debug.log*
+.env
+.env.*
+.dev.vars
+
+# generated at runtime
+debug/
+*.html
+*.log
+playwright-report/
+test-results/
+
+# local secrets / browser state
+storageState.json
+*.storage.json
+*.cookies.json

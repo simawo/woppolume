@@ -1,0 +1,59 @@
+name: lume-check
+
+on:
+  workflow_dispatch:
+    inputs:
+      guild_id:
+        description: "対象DiscordサーバーID。空なら全体確認"
+        required: false
+        type: string
+      upload_debug:
+        description: "debug artifactを出す"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: npm ci --omit=dev --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+      - name: Run check
+        run: npm run run
+        env:
+          CHECK_ONLY: "1"
+          WOLUME_ENDPOINT: ${{ secrets.WOLUME_ENDPOINT }}
+          RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
+          WOLUME_GUILD_ID: ${{ inputs.guild_id }}
+          ACTION_LABEL: ${{ secrets.ACTION_LABEL }}
+          MENU_LABEL: ${{ vars.MENU_LABEL }}
+          MENU_SELECTOR: ${{ vars.MENU_SELECTOR }}
+          CLOSE_DIALOG_LABEL: ${{ vars.CLOSE_DIALOG_LABEL }}
+          TAB_LABELS: ${{ vars.TAB_LABELS }}
+          CCFOLIA_STORAGE_STATE_JSON: ${{ secrets.CCFOLIA_STORAGE_STATE_JSON }}
+          MAX_TARGETS: ${{ vars.MAX_TARGETS }}
+          MAX_TABS_PER_TARGET: ${{ vars.MAX_TABS_PER_TARGET }}
+          POLITE_DELAY_MS: ${{ vars.POLITE_DELAY_MS }}
+          WRITE_DEBUG: ${{ inputs.upload_debug && '1' || '0' }}
+
+      - name: Upload debug files
+        if: always() && inputs.upload_debug == true
+        uses: actions/upload-artifact@v7
+        with:
+          name: wolume-diagnostics
+          path: debug/
+          retention-days: 1

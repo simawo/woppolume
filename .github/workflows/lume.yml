@@ -1,0 +1,50 @@
+name: lume
+
+on:
+  workflow_dispatch:
+    inputs:
+      guild_id:
+        description: "対象DiscordサーバーID。空なら全体確認"
+        required: false
+        type: string
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+concurrency:
+  group: wolume
+  cancel-in-progress: false
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: npm ci --omit=dev --no-audit --no-fund
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+
+      - name: Run cycle
+        run: npm run run
+        env:
+          WOLUME_ENDPOINT: ${{ secrets.WOLUME_ENDPOINT }}
+          RUNNER_TOKEN: ${{ secrets.RUNNER_TOKEN }}
+          WOLUME_GUILD_ID: ${{ inputs.guild_id }}
+          ACTION_LABEL: ${{ secrets.ACTION_LABEL }}
+          MENU_LABEL: ${{ vars.MENU_LABEL }}
+          MENU_SELECTOR: ${{ vars.MENU_SELECTOR }}
+          CLOSE_DIALOG_LABEL: ${{ vars.CLOSE_DIALOG_LABEL }}
+          TAB_LABELS: ${{ vars.TAB_LABELS }}
+          CCFOLIA_STORAGE_STATE_JSON: ${{ secrets.CCFOLIA_STORAGE_STATE_JSON }}
+          MAX_TARGETS: ${{ vars.MAX_TARGETS }}
+          MAX_TABS_PER_TARGET: ${{ vars.MAX_TABS_PER_TARGET }}
+          POLITE_DELAY_MS: ${{ vars.POLITE_DELAY_MS }}
+          CHECK_ONLY: "0"
+          WRITE_DEBUG: "0"
